@@ -1,41 +1,71 @@
 <template>
     <header>
-        <button>Upload files...</button>
-        <FilePond
-        class="hidden"
-        name="test"
-        ref="pond"
-        label-idle="Drop files here..."
-        v-bind:allow-multiple="true"
-        v-on:updatefiles="handleUpdateFile"/>
-        <TypeSelect :isInput="true"/>
-        <TypeSelect :isInput="false"/>
+        <div id="header-buttons-container" class="flex items-start">
+            <FileUploader/>
+            <TypeSelect
+            :class="{error: isEmptyInput}"
+            :isInput="true"
+            @change.native="isEmptyInput=false"
+            />
+            <TypeSelect
+            :class="{error: isEmptyOutput}"
+            :isInput="false"
+            @change.native="isEmptyOutput=false"
+            />
+            <button @click="onClickParse"> Parse! </button>
+        </div>
     </header>
 </template>
 <script>
-import vueFilePond from 'vue-filepond';
-import 'filepond/dist/filepond.min.css';
-import TypeSelect from './HeaderFileTypeSelect.vue';
 
-const FilePond = vueFilePond();
+import { Parser } from '@dbml/core';
+import TypeSelect from './HeaderFileTypeSelect.vue';
+import FileUploader from './HeaderFileUploader.vue';
 
 export default {
   name: 'Header',
+  data() {
+    return {
+      isEmptyInput: false,
+      isEmptyOutput: false,
+    };
+  },
   methods: {
-    handleUpdateFile(files) {
-      if (files) console.log(files);
-      // console.log(files[0].file.text());
+    onClickParse() {
+      const s = this.$store.state;
+      if (!s.inputType) {
+        this.isEmptyInput = true;
+      }
+      if (!s.outputType) {
+        this.isEmptyOutput = true;
+      }
+      if (this.isEmptyOutput || this.isEmptyInput) return;
+      s.files.forEach((file) => {
+        try {
+          Parser.parse(file.content, s.inputType);
+        } catch (err) {
+            
+        }
+      });
     },
   },
   components: {
-    FilePond,
     TypeSelect,
+    FileUploader,
   },
 };
 </script>
 
 <style scoped>
  .filepond--wrapper {
-   width: 50%;
+   width: 20%;
  }
+
+.error {
+    @apply border-solid border-red-400 border-2;
+}
+
+#header-buttons-container > *{
+    @apply ml-4 inline-block;
+}
 </style>

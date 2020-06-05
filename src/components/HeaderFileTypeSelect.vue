@@ -1,15 +1,12 @@
 <template>
-    <div>
-        <label>{{label}}</label>
-        <select v-model="type" @change="setType">
-            <option value='' disabled>{{placeholder}}</option>
-            <option value="json">JSON</option>
-            <option value="mssql">MSSQL</option>
-            <option value="dbml">DBML</option>
-            <option value="mysql">MySQL</option>
-            <option value="postgres">Postgresql</option>
-        </select>
-    </div>
+    <select v-model="type" @change="setType">
+        <option value='' disabled>{{placeholder}}</option>
+        <option value="json">JSON</option>
+        <option value="mssql">MSSQL</option>
+        <option value="dbml">DBML</option>
+        <option value="mysql">MySQL</option>
+        <option value="postgres">Postgresql</option>
+    </select>
 </template>
 <script>
 export default {
@@ -28,9 +25,6 @@ export default {
   computed: {
     placeholder() {
       return this.isInput ? 'Select input type' : 'Select output type';
-    },
-    label() {
-      return this.isInput ? 'Input:' : 'Output:';
     },
   },
   methods: {

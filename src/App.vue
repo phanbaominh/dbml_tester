@@ -1,16 +1,16 @@
 <template>
   <div id="app" class="project-view-container h-screen bg-white border-l border-solid">
     <Header/>
-    <DiagramView
+    <!--DiagramView
       class="hidden"
       :database="database"
-    />
+    /-->
   </div>
 </template>
 
 <script>
 import { Parser } from '@dbml/core';
-import DiagramView from './components/DiagramView.vue';
+// import DiagramView from './components/DiagramView.vue';
 import Header from './components/Header.vue';
 import '@holistics/dbrender/dist/dbrender.css';
 
@@ -89,7 +89,7 @@ Ref reviews_booking: "bookings"."id" < "reviews"."booking_id"
 export default {
   name: 'App',
   components: {
-    DiagramView,
+    // DiagramView,
     Header,
   },
   data() {
