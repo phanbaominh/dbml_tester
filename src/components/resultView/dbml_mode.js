@@ -42,7 +42,7 @@ ace.define('ace/mode/dsl_highlight_rules', ['require', 'exports', 'ace/lib/oop',
   exports.DSLHighlightRules = DSLHighlightRules;
 });
 
-ace.define('ace/mode/dsl', ['require', 'exports', 'ace/lib/oop', 'ace/mode/text', 'ace/mode/custom_highlight_rules'], (acequire, exports) => {
+ace.define('ace/mode/dbml', ['require', 'exports', 'ace/lib/oop', 'ace/mode/text', 'ace/mode/custom_highlight_rules'], (acequire, exports) => {
   const oop = acequire('ace/lib/oop');
   const TextMode = acequire('ace/mode/text').Mode;
   const { DSLHighlightRules } = acequire('./dsl_highlight_rules');
@@ -55,7 +55,7 @@ ace.define('ace/mode/dsl', ['require', 'exports', 'ace/lib/oop', 'ace/mode/text'
 
   (function () {
     this.lineCommentStart = '//';
-    this.$id = 'ace/mode/dsl';
+    this.$id = 'ace/mode/dbml';
   }).call(Mode.prototype);
 
   exports.Mode = Mode; // eslint-disable-line no-param-reassign

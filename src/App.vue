@@ -6,8 +6,9 @@
       :database="database"
     /-->
     <ResultView
-      v-for="file in parsedFiles"
+      v-for="file in files"
       :key="file.id"
+      :fileName="file.name"
       :initContent="file.content"
       :initOutput="file.output"
     />
@@ -30,7 +31,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'parsedFiles',
+      'files',
     ]),
   },
 };

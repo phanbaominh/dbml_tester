@@ -40,20 +40,25 @@ export default {
         this.isEmptyOutput = true;
       }
       if (this.isEmptyOutput || this.isEmptyInput) return;
-      s.files.forEach((file) => {
+      s.files.forEach((file, index) => {
+        const payload = {
+          index,
+        };
         try {
           const database = Parser.parse(file.content, s.inputType);
           const parsed = ModelExporter.export(database.normalize(), s.outputType);
-          this.$store.commit('pushParsedFile', {
+          payload.value = {
             ...file,
             output: parsed,
-          });
+          };
         } catch (err) {
-          this.$store.commit('pushParsedFile', {
+          payload.value = {
             ...file,
             output: err.message,
             error: true,
-          });
+          };
+        } finally {
+          this.$store.commit('pushParsedFile', payload);
         }
       });
     },

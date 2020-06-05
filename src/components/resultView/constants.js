@@ -20,9 +20,13 @@ export default { // eslint-disable-line
     fileExtension: 'sql',
     uploadFile: '.sql',
   },
-  dsl: {
+  dbml: {
     name: 'DSL',
-    editorLang: 'dsl',
+    editorLang: 'dbml',
+  },
+  json: {
+    name: 'JSON',
+    editorLang: 'json',
   },
   schemarb: {
     value: 'schemarb',

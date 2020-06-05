@@ -8,7 +8,6 @@ export default new Vuex.Store({
     inputType: '',
     outputType: '',
     files: [],
-    parsedFiles: [],
     nextId: 0,
   },
   mutations: {
@@ -22,20 +21,25 @@ export default new Vuex.Store({
       state.files.push(file);
     },
 
-    pushParsedFile(state, parsed) {
-      parsed.id = state.nextId++; //eslint-disable-line
-      state.parsedFiles.push(parsed);
+    pushParsedFile(state, payload) {
+      state.files = state.files.map((file, index) => {
+        let mappedValue = file;
+        if (index === payload.index) {
+          mappedValue = payload.value;
+        }
+        return mappedValue;
+      });
     },
 
-    removeFile(state, fileName) {
-      const index = state.files.findIndex((file) => file.filename === fileName);
+    removeFile(state, id) {
+      const index = state.files.findIndex((file) => file.id === id);
       state.files.splice(index, 1);
     },
   },
   actions: {
     async setFile({ commit }, file) {
       const fileText = await file.file.text();
-      commit('pushFile', { name: file.filename, content: fileText });
+      commit('pushFile', { name: file.filename, content: fileText, id: file.id });
     },
   },
   modules: {

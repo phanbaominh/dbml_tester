@@ -20,7 +20,7 @@ export default {
     },
 
     onRemoveFile(error, file) {
-      this.$store.commit('removeFile', file.filename);
+      this.$store.commit('removeFile', file.id);
     },
   },
   components: {

@@ -1,43 +1,48 @@
 <template>
-  <div class="flex justify-between">
-    <div class="ace-editor-wrapper">
-      <AceEditor
-        id="ace-import-editor"
-        v-model="content"
-        @init="editorInit"
-        @input="editorChange"
-        v-bind:lang="selectedFormatLang"
-        v-bind:options="editorOptions"
-        theme="holistics"
-        ref="aceEditor"
-        class="editor"
-      />
-    </div>
-    <div class="ace-editor-wrapper">
-      <AceEditor
-        id="ace-import-editor"
-        v-model="output"
-        @init="editorInit"
-        v-bind:lang="selectedFormatLang"
-        v-bind:options="editorOptions"
-        theme="holistics"
-        ref="aceEditor"
-        class="editor"
-      />
+  <div>
+    <div class="text-center text-5xl">{{fileName}}</div>
+    <div class="flex justify-between">
+      <div class="ace-editor-wrapper">
+        <AceEditor
+          id="ace-import-editor"
+          v-model="content"
+          @init="editorInit"
+          @input="editorChange"
+          v-bind:lang="selectedInputFormatLang"
+          v-bind:options="editorOptions"
+          theme="holistics"
+          ref="aceEditor"
+          class="editor"
+        />
+      </div>
+      <div class="ace-editor-wrapper">
+          <AceEditor
+            id="ace-import-editor"
+            v-model="output"
+            @init="editorInit"
+            v-bind:lang="selectedOutputFormatLang"
+            v-bind:options="editorOptions"
+            theme="holistics"
+            ref="aceEditor"
+            class="editor"
+          />
+        </div>
     </div>
   </div>
 </template>
 <script>
 import AceEditor from 'vue2-ace-editor';
 import ace from 'brace';
-import debounce from 'lodash/debounce';
+// import debounce from 'lodash/debounce';
 import 'brace/mode/pgsql'; // language
 import 'brace/mode/mysql';
 import 'brace/mode/sqlserver';
+import 'brace/mode/json';
 import './dbml_mode';
 import './holistics_theme';
-import formats from 'constants';
+import formats from './constants';
 
+console.log(formats);
 export default {
   name: 'ResultView',
   components: {
@@ -52,6 +57,10 @@ export default {
       type: String,
       default: '',
     },
+    fileName: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return ({
@@ -62,11 +71,10 @@ export default {
         // enableLiveAutocompletion: true,
         hScrollBarAlwaysVisible: false,
         vScrollBarAlwaysVisible: false,
-        fontSize: 12,
-        minLines: 20,
-        maxLines: 20,
+        fontSize: 14,
+        maxLines: 40,
         showPrintMargin: false,
-        fontFamily: 'Droid Sans Mono',
+        fontFamily: 'monospace',
       },
       content: this.initContent,
       output: this.initOutput,
@@ -74,17 +82,11 @@ export default {
     });
   },
   computed: {
-    selectedFormatLang() {
-      return (formats[this.type] || {}).editorLang || 'text';
+    selectedInputFormatLang() {
+      return (formats[this.$store.state.inputType] || {}).editorLang || 'text';
     },
-    selectedFormatName() {
-      return (formats[this.type] || {}).name || 'SQL';
-    },
-    extensionFile() {
-      return `.${(formats[this.type] || {}).fileExtension || 'sql'}`;
-    },
-    uploadFile() {
-      return `${(formats[this.type] || {}).uploadFile || '.sql'}`;
+    selectedOutputFormatLang() {
+      return (formats[this.$store.state.outputType] || {}).editorLang || 'text';
     },
   },
   watch: {
@@ -102,16 +104,14 @@ export default {
         }]);
       }
     },
+    initContent(newValue) {
+      this.content = newValue;
+    },
+    initOutput(newValue) {
+      this.output = newValue;
+    },
   },
-  updated() {
-    if (this.show) {
-      const editor = ace.edit('ace-import-editor');
-      editor.resize();
-      if (this.parseError) {
-        editor.scrollToLine(this.parseError.row, true, true);
-      }
-    }
-  },
+
   methods: {
     editorInit() {
       require('ace-builds/src-min-noconflict/ace'); // eslint-disable-line
@@ -124,36 +124,10 @@ export default {
       require('ace-builds/src-min-noconflict/ext-searchbox'); // eslint-disable-line
       require('brace/theme/chrome'); //eslint-disable-line
     },
+    // eslint-disable-next-line no-unused-vars
     editorChange(content) {
-      this.parse(content);
+      // this.parse(content);
     },
-
-    parseDirectly(content) {
-      const editor = ace.edit('ace-import-editor');
-      const editorSession = editor.getSession();
-      editorSession.clearAnnotations();
-      if (content && content.length > 0) {
-        try {
-          const parse = ''; // importer.import(content, this.type);
-          this.parseError = null;
-          return parse;
-        } catch (err) {
-          this.parseError = {
-            row: err.location.start.line - 1,
-            column: err.location.start.column,
-            text: err.message,
-            type: 'error',
-            ...err,
-          };
-          return null;
-        }
-      }
-      this.parseError = null;
-      return null;
-    },
-    parse: debounce(function parse(content) {
-      return this.parseDirectly(content);
-    }, 300),
   },
 };
 
@@ -161,8 +135,7 @@ export default {
 </script>
 <style scoped>
   .ace-editor-wrapper {
-    height: 100vh;
+    margin-bottom: 5rem;
     width: 50%;
-    margin-bottom: 10rem;
   }
 </style>
