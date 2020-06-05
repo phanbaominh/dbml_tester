@@ -18,7 +18,7 @@
 </template>
 <script>
 
-import { Parser } from '@dbml/core';
+import { Parser, ModelExporter } from '@dbml/core';
 import TypeSelect from './HeaderFileTypeSelect.vue';
 import FileUploader from './HeaderFileUploader.vue';
 
@@ -42,9 +42,18 @@ export default {
       if (this.isEmptyOutput || this.isEmptyInput) return;
       s.files.forEach((file) => {
         try {
-          Parser.parse(file.content, s.inputType);
+          const database = Parser.parse(file.content, s.inputType);
+          const parsed = ModelExporter.export(database.normalize(), s.outputType);
+          this.$store.commit('pushParsedFile', {
+            ...file,
+            output: parsed,
+          });
         } catch (err) {
-            
+          this.$store.commit('pushParsedFile', {
+            ...file,
+            output: err.message,
+            error: true,
+          });
         }
       });
     },

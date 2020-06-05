@@ -8,6 +8,8 @@ export default new Vuex.Store({
     inputType: '',
     outputType: '',
     files: [],
+    parsedFiles: [],
+    nextId: 0,
   },
   mutations: {
     setInputType(state, type) {
@@ -18,6 +20,11 @@ export default new Vuex.Store({
     },
     pushFile(state, file) {
       state.files.push(file);
+    },
+
+    pushParsedFile(state, parsed) {
+      parsed.id = state.nextId++; //eslint-disable-line
+      state.parsedFiles.push(parsed);
     },
 
     removeFile(state, fileName) {
