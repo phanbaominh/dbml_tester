@@ -15,7 +15,7 @@
           class="editor"
         />
         <div v-if="parseError" class="error-container">
-          ({{parseError.row + 1}}:{{parseError.column}}) {{parseError.text}}
+            {{parseErrorText}}
         </div>
       </div>
       <div class="ace-editor-wrapper">
@@ -37,6 +37,7 @@
 import AceEditor from 'vue2-ace-editor';
 import ace from 'brace';
 import debounce from 'lodash/debounce';
+import $ from 'jquery';
 import 'brace/mode/pgsql'; // language
 import 'brace/mode/mysql';
 import 'brace/mode/sqlserver';
@@ -48,6 +49,8 @@ import './holistics_theme';
 import { Parser, ModelExporter } from '@dbml/core';
 import formats from './constants';
 
+
+let scrollIntoView;
 export default {
   name: 'ResultView',
   components: {
@@ -74,8 +77,8 @@ export default {
         fontFamily: 'monospace',
       },
       content: this.file.content,
-      output: this.file.output,
-      parseError: null,
+      output: '',
+      parseError: '',
     });
   },
   computed: {
@@ -91,13 +94,23 @@ export default {
     outputEditorId() {
       return `ace-output-editor-${this.file.id}`;
     },
+    parseErrorText() {
+      if (this.parseError.location) {
+        return `${this.parseError.row + 1}:${this.parseError.column} ${this.parseError.text}`;
+      }
+      console.error(this.parseError);
+      return `Internal Error: ${this.parseError.text}`;
+    },
   },
   watch: {
     parseError(error) {
       const editor = ace.edit(this.inputEditorId);
       const editorSession = editor.getSession();
+      const fileElement = this.getFileInfoEle();
+
       editorSession.clearAnnotations();
       if (error && error.location) {
+        fileElement.toggleClass('file-info-error');
         editorSession.clearAnnotations();
         editorSession.setAnnotations([{
           row: error.row,
@@ -105,26 +118,45 @@ export default {
           text: error.text,
           type: error.type,
         }]);
+      } else if (error || fileElement.hasClass('file-info-error')) {
+        fileElement.toggleClass('file-info-error');
       }
     },
     'file.content': function (newValue) {
       this.content = newValue;
     },
-    'file.output': function (newValue) {
-      this.output = newValue;
+    'file.isParsed': function () {
+      if (this.file.isParsed) {
+        this.$store.commit('setParsedState', this.file.id);
+        this.parseDirectly(this.content);
+      }
     },
   },
   updated() {
     const editor = ace.edit(this.inputEditorId);
     editor.resize();
-    if (this.parseError) {
+    if (this.parseError && this.parseError.location) {
       editor.scrollToLine(this.parseError.row, true, true);
     }
   },
   mounted() {
     ace.edit(this.outputEditorId).setReadOnly(true);
+    const currentEl = this.$el;
+    scrollIntoView = () => {
+      currentEl.scrollIntoView();
+    };
+    const fileElement = this.getFileInfoEle();
+    fileElement.css('pointer-events', 'auto');
+    fileElement.addClass('file-info-hover');
+    fileElement.on('click', scrollIntoView);
+  },
+  beforeDestroy() {
+    this.getFileInfoEle().removeEventListener('click', scrollIntoView);
   },
   methods: {
+    getFileInfoEle() {
+      return $(`#filepond--item-${this.file.id} .filepond--file-info`);
+    },
     editorInit() {
       console.log('enabled!');
     },
@@ -144,8 +176,8 @@ export default {
         } catch (err) {
           this.output = '';
           this.parseError = {
-            row: err.location.start.line - 1,
-            column: err.location.start.column,
+            row: err.location ? err.location.start.line - 1 : 1,
+            column: err.location ? err.location.start.column : 1,
             text: err.message,
             type: 'error',
             ...err,

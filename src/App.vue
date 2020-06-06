@@ -41,4 +41,12 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.file-info-hover:hover {
+  @apply underline text-blue-400;
+}
+
+.file-info-error {
+  color: red;
+}
 </style>

@@ -25,6 +25,12 @@ export default new Vuex.Store({
       Vue.set(state.files, payload.index, payload.value);
     },
 
+    setParsedState(state, id) {
+      const changedFile = state.files.find((file) => file.id === id);
+      // console.log(changedFile);
+      changedFile.isParsed = !changedFile.isParsed;
+    },
+
     removeFile(state, id) {
       const index = state.files.findIndex((file) => file.id === id);
       state.files.splice(index, 1);
@@ -33,7 +39,12 @@ export default new Vuex.Store({
   actions: {
     async setFile({ commit }, file) {
       const fileText = await file.file.text();
-      commit('pushFile', { name: file.filename, content: fileText, id: file.id });
+      commit('pushFile', {
+        name: file.filename,
+        content: fileText,
+        id: file.id,
+        isParsed: false,
+      });
     },
   },
   modules: {

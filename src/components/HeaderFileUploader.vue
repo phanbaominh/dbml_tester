@@ -20,6 +20,7 @@ export default {
     },
 
     onRemoveFile(error, file) {
+      console.log(this.$el.querySelector(`#filepond--item-${file.id}`));
       this.$store.commit('removeFile', file.id);
     },
   },
