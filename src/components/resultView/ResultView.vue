@@ -4,7 +4,7 @@
     <div class="flex justify-between">
       <div class="ace-editor-wrapper">
         <AceEditor
-          id="ace-import-editor"
+          :id="inputEditorId"
           v-model="content"
           @init="editorInit"
           @input="editorChange"
@@ -14,10 +14,13 @@
           ref="aceEditor"
           class="editor"
         />
+        <div v-if="parseError" class="error-container">
+          ({{parseError.row + 1}}:{{parseError.column}}) {{parseError.text}}
+        </div>
       </div>
       <div class="ace-editor-wrapper">
           <AceEditor
-            id="ace-import-editor"
+            :id="outputEditorId"
             v-model="output"
             @init="editorInit"
             v-bind:lang="selectedOutputFormatLang"
@@ -33,16 +36,18 @@
 <script>
 import AceEditor from 'vue2-ace-editor';
 import ace from 'brace';
-// import debounce from 'lodash/debounce';
+import debounce from 'lodash/debounce';
 import 'brace/mode/pgsql'; // language
 import 'brace/mode/mysql';
 import 'brace/mode/sqlserver';
 import 'brace/mode/json';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
 import './dbml_mode';
 import './holistics_theme';
+import { Parser, ModelExporter } from '@dbml/core';
 import formats from './constants';
 
-console.log(formats);
 export default {
   name: 'ResultView',
   components: {
@@ -61,14 +66,18 @@ export default {
       type: String,
       default: '',
     },
+    fileId: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return ({
       isEditorOpen: true,
       editorOptions: {
         tabSize: 2,
-        // enableBasicAutocompletion: true,
-        // enableLiveAutocompletion: true,
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
         hScrollBarAlwaysVisible: false,
         vScrollBarAlwaysVisible: false,
         fontSize: 14,
@@ -88,10 +97,16 @@ export default {
     selectedOutputFormatLang() {
       return (formats[this.$store.state.outputType] || {}).editorLang || 'text';
     },
+    inputEditorId() {
+      return `ace-input-editor-${this.fileId}`;
+    },
+    outputEditorId() {
+      return `ace-output-editor-${this.fileId}`;
+    },
   },
   watch: {
     parseError(error) {
-      const editor = ace.edit('ace-import-editor');
+      const editor = ace.edit(this.inputEditorId);
       const editorSession = editor.getSession();
       editorSession.clearAnnotations();
       if (error && error.location) {
@@ -111,23 +126,51 @@ export default {
       this.output = newValue;
     },
   },
-
+  updated() {
+    const editor = ace.edit(this.inputEditorId);
+    editor.resize();
+    if (this.parseError) {
+      editor.scrollToLine(this.parseError.row, true, true);
+    }
+  },
+  mounted() {
+    ace.edit(this.outputEditorId).setReadOnly(true);
+  },
   methods: {
     editorInit() {
-      require('ace-builds/src-min-noconflict/ace'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/theme-tomorrow_night_bright'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/mode-pgsql'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/mode-mysql'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/mode-sqlserver'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/mode-ruby'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/ext-language_tools'); // eslint-disable-line
-      require('ace-builds/src-min-noconflict/ext-searchbox'); // eslint-disable-line
-      require('brace/theme/chrome'); //eslint-disable-line
+      console.log('enabled!');
     },
     // eslint-disable-next-line no-unused-vars
     editorChange(content) {
-      // this.parse(content);
+      this.parse(content);
     },
+    parseDirectly(content) {
+      const editor = ace.edit(this.inputEditorId);
+      const editorSession = editor.getSession();
+      editorSession.clearAnnotations();
+      if (content && content.length > 0) {
+        try {
+          const database = Parser.parse(this.content, this.$store.state.inputType);
+          this.output = ModelExporter.export(database, this.$store.state.outputType, false);
+          this.parseError = null;
+        } catch (err) {
+          this.output = '';
+          this.parseError = {
+            row: err.location.start.line - 1,
+            column: err.location.start.column,
+            text: err.message,
+            type: 'error',
+            ...err,
+          };
+          return null;
+        }
+      }
+      this.parseError = null;
+      return null;
+    },
+    parse: debounce(function parse(content) {
+      return this.parseDirectly(content);
+    }, 300),
   },
 };
 
@@ -137,5 +180,19 @@ export default {
   .ace-editor-wrapper {
     margin-bottom: 5rem;
     width: 50%;
+  }
+  .error-container {
+    height: 2rem;
+    width: 100%;
+    color: white;
+    background-color: #e74c3c;
+    padding-left: 20px;
+    border-top-color: #e74c3c;
+    border-top-width: 1px;
+    border-top-style: solid;
+    padding-top: 5px;
+    margin-top: 1px;
+    overflow-y: scroll;
+    box-sizing: border-box;
   }
 </style>

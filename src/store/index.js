@@ -22,13 +22,7 @@ export default new Vuex.Store({
     },
 
     pushParsedFile(state, payload) {
-      state.files = state.files.map((file, index) => {
-        let mappedValue = file;
-        if (index === payload.index) {
-          mappedValue = payload.value;
-        }
-        return mappedValue;
-      });
+      Vue.set(state.files, payload.index, payload.value);
     },
 
     removeFile(state, id) {

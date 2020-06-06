@@ -46,7 +46,7 @@ export default {
         };
         try {
           const database = Parser.parse(file.content, s.inputType);
-          const parsed = ModelExporter.export(database.normalize(), s.outputType);
+          const parsed = ModelExporter.export(database, s.outputType, false);
           payload.value = {
             ...file,
             output: parsed,
@@ -54,8 +54,14 @@ export default {
         } catch (err) {
           payload.value = {
             ...file,
-            output: err.message,
-            error: true,
+            output: 'Parsing Error!',
+            error: {
+              row: err.location.start.line - 1,
+              column: err.location.start.column,
+              text: err.message,
+              type: 'error',
+              ...err,
+            },
           };
         } finally {
           this.$store.commit('pushParsedFile', payload);
