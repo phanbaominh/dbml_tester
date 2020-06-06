@@ -8,10 +8,7 @@
     <ResultView
       v-for="file in files"
       :key="file.id"
-      :fileName="file.name"
-      :fileId="file.id"
-      :initContent="file.content"
-      :initOutput="file.output"
+      :file="file"
     />
   </div>
 </template>

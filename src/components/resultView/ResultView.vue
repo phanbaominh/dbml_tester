@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center text-5xl">{{fileName}}</div>
+    <div class="text-center text-5xl">{{file.name}}</div>
     <div class="flex justify-between">
       <div class="ace-editor-wrapper">
         <AceEditor
@@ -54,21 +54,9 @@ export default {
     AceEditor,
   },
   props: {
-    initContent: {
-      type: String,
-      default: '',
-    },
-    initOutput: {
-      type: String,
-      default: '',
-    },
-    fileName: {
-      type: String,
-      default: '',
-    },
-    fileId: {
-      type: String,
-      default: '',
+    file: {
+      type: Object,
+      default: () => {},
     },
   },
   data() {
@@ -85,8 +73,8 @@ export default {
         showPrintMargin: false,
         fontFamily: 'monospace',
       },
-      content: this.initContent,
-      output: this.initOutput,
+      content: this.file.content,
+      output: this.file.output,
       parseError: null,
     });
   },
@@ -98,10 +86,10 @@ export default {
       return (formats[this.$store.state.outputType] || {}).editorLang || 'text';
     },
     inputEditorId() {
-      return `ace-input-editor-${this.fileId}`;
+      return `ace-input-editor-${this.file.id}`;
     },
     outputEditorId() {
-      return `ace-output-editor-${this.fileId}`;
+      return `ace-output-editor-${this.file.id}`;
     },
   },
   watch: {
@@ -119,10 +107,10 @@ export default {
         }]);
       }
     },
-    initContent(newValue) {
+    'file.content': function (newValue) {
       this.content = newValue;
     },
-    initOutput(newValue) {
+    'file.output': function (newValue) {
       this.output = newValue;
     },
   },
