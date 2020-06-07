@@ -106,6 +106,9 @@ export default {
     isDownloadAll() {
       return this.$store.state.isDownloadAll;
     },
+    isParsedAll() {
+      return this.$store.state.isParsedAll;
+    },
   },
   watch: {
     parseError(error) {
@@ -127,17 +130,17 @@ export default {
         fileElement.toggleClass('file-info-error');
       }
     },
-    'file.content': function (newValue) {
-      this.content = newValue;
+    'file.content': function (content) {
+      this.content = content;
     },
-    'file.isParsed': function () {
-      if (this.file.isParsed) {
-        this.$store.commit('setParsedState', this.file.id);
+    isParsedAll(isParsed) {
+      if (isParsed) {
+        this.$store.commit('increaseParseCount');
         this.parseDirectly(this.content);
       }
     },
-    isDownloadAll(bool) {
-      if (bool) {
+    isDownloadAll(isDownloadAll) {
+      if (isDownloadAll) {
         const output = {
           name: this.getOutputFileName(),
           content: this.output,

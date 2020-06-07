@@ -13,6 +13,8 @@ export default new Vuex.Store({
     outputCount: 0,
     zip: new JSZip(),
     isDownloadAll: false,
+    parseCount: 0,
+    isParsedAll: false,
   },
   mutations: {
     setInputType(state, type) {
@@ -29,11 +31,6 @@ export default new Vuex.Store({
       Vue.set(state.files, payload.index, payload.value);
     },
 
-    setParsedState(state, id) {
-      const changedFile = state.files.find((file) => file.id === id);
-      // console.log(changedFile);
-      changedFile.isParsed = !changedFile.isParsed;
-    },
     addFileToFolder(state, output) {
       state.zip.folder('output').file(output.name, output.content);
       state.outputCount += 1;
@@ -41,6 +38,16 @@ export default new Vuex.Store({
     removeFile(state, id) {
       const index = state.files.findIndex((file) => file.id === id);
       state.files.splice(index, 1);
+    },
+    setParseAll(state) {
+      state.isParsedAll = true;
+    },
+    increaseParseCount(state) {
+      state.parseCount += 1;
+      if (state.parseCount === state.files.length) {
+        state.parseCount = 0;
+        state.isParsedAll = false;
+      }
     },
     setDownloadAll(state) {
       state.isDownloadAll = !state.isDownloadAll;
