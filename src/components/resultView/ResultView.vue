@@ -2,7 +2,7 @@
   <div>
     <div>
       <div class="text-center text-5xl">{{file.name}}</div>
-      <button @click="sendDownloadFile">Download Output</button>
+      <button @click="downloadOutputFile">Download Output</button>
     </div>
     <div class="flex justify-between">
       <div class="ace-editor-wrapper">
@@ -103,6 +103,9 @@ export default {
       }
       return `Internal Error: ${this.parseError.text}`;
     },
+    isDownloadAll() {
+      return this.$store.state.isDownloadAll;
+    },
   },
   watch: {
     parseError(error) {
@@ -131,6 +134,15 @@ export default {
       if (this.file.isParsed) {
         this.$store.commit('setParsedState', this.file.id);
         this.parseDirectly(this.content);
+      }
+    },
+    isDownloadAll(bool) {
+      if (bool) {
+        const output = {
+          name: this.getOutputFileName(),
+          content: this.output,
+        };
+        this.$store.dispatch('setOutputFile', output);
       }
     },
   },
@@ -205,10 +217,9 @@ export default {
         }
         filename += addedPart;
       });
-      console.log(filename);
       return filename;
     },
-    sendDownloadFile() {
+    downloadOutputFile() {
       const element = document.createElement('a');
       $(element).attr('href', `data:text/plain;charset=utf-8,${encodeURIComponent(this.output)}`);
       $(element).attr('download', this.getOutputFileName());

@@ -13,6 +13,7 @@
             @change.native="isEmptyOutput=false"
             />
             <button @click="onClickParse"> Parse! </button>
+            <button @click="onDownloadAll">Download Output</button>
         </div>
     </header>
 </template>
@@ -42,6 +43,9 @@ export default {
       s.files.forEach((file) => {
         this.$store.commit('setParsedState', file.id);
       });
+    },
+    onDownloadAll() {
+      this.$store.commit('setDownloadAll');
     },
   },
   components: {
