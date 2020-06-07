@@ -2,6 +2,7 @@
     <FilePond
     name="test"
     ref="pond"
+    class="filepond"
     label-idle="Drop files here..."
     v-bind:allow-multiple="true"
     v-on:addfile="onAddFile"
@@ -28,3 +29,5 @@ export default {
   },
 };
 </script>
+<style scoped>
+</style>

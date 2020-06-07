@@ -1,68 +1,67 @@
 <template>
-    <header>
-        <div id="header-buttons-container" class="flex items-start">
-            <FileUploader/>
+    <div class="flex items-start">
+      <FileUploader/>
+      <header>
+        <div id="header-buttons-container" class="flex items-center">
             <TypeSelect
-            :class="{error: isEmptyInput}"
             :isInput="true"
-            @change.native="isEmptyInput=false"
+            @change.native="parseAll(true)"
             />
             <TypeSelect
-            :class="{error: isEmptyOutput}"
             :isInput="false"
-            @change.native="isEmptyOutput=false"
+            @change.native="parseAll(false)"
             />
-            <button @click="onClickParse"> Parse! </button>
-            <button @click="onDownloadAll">Download Output</button>
+            <HeaderButton icon="download" @click.native="downloadAll">
+              Download All Output
+            </HeaderButton>
         </div>
-    </header>
+      </header>
+    </div>
 </template>
 <script>
 
 import TypeSelect from './HeaderFileTypeSelect.vue';
 import FileUploader from './HeaderFileUploader.vue';
+import HeaderButton from './HeaderButton.vue';
 
 export default {
   name: 'Header',
   data() {
     return {
-      isEmptyInput: false,
-      isEmptyOutput: false,
+      isEmptyInput: true,
+      isEmptyOutput: true,
     };
   },
   methods: {
-    onClickParse() {
-      const s = this.$store.state;
-      if (!s.inputType) {
-        this.isEmptyInput = true;
-      }
-      if (!s.outputType) {
-        this.isEmptyOutput = true;
+    parseAll(isInputType) {
+      if (isInputType) {
+        this.isEmptyInput = false;
+      } else {
+        this.isEmptyOutput = false;
       }
       if (this.isEmptyOutput || this.isEmptyInput) return;
       this.$store.commit('setParseAll');
     },
-    onDownloadAll() {
+    downloadAll() {
       this.$store.commit('setDownloadAll');
     },
   },
   components: {
     TypeSelect,
     FileUploader,
+    HeaderButton,
   },
 };
 </script>
 
 <style scoped>
- .filepond--wrapper {
-   width: 20%;
- }
-
-.error {
-    @apply border-solid border-red-400 border-2;
+.filepond--wrapper {
+  width: 20%;
 }
 
 #header-buttons-container > *{
-    @apply ml-4 inline-block;
+  margin-left: 1rem;
+  display: inline-block;
 }
+
 </style>

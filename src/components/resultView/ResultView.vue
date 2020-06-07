@@ -1,9 +1,18 @@
 <template>
   <div>
-    <div>
-      <div class="text-center text-5xl">{{file.name}}</div>
-      <button @click="downloadOutputFile">Download Output</button>
-    </div>
+    <header class="flex justify-between">
+      <div class="self-end">
+        <HeaderButton icon="download" @click.native="downloadInputFile">
+          Input
+        </HeaderButton>
+      </div>
+      <div class="text-center text-3xl">{{file.name}}</div>
+      <div class="self-end">
+        <HeaderButton icon="download" @click.native="downloadOutputFile">
+          Output
+        </HeaderButton>
+      </div>
+    </header>
     <div class="flex justify-between">
       <div class="ace-editor-wrapper">
         <AceEditor
@@ -50,14 +59,16 @@ import 'brace/ext/searchbox';
 import './dbml_mode';
 import './holistics_theme';
 import { Parser, ModelExporter } from '@dbml/core';
+import { mapState } from 'vuex';
 import formats from './constants';
-
+import HeaderButton from '../HeaderButton.vue';
 
 let scrollIntoView;
 export default {
   name: 'ResultView',
   components: {
     AceEditor,
+    HeaderButton,
   },
   props: {
     file: {
@@ -85,12 +96,6 @@ export default {
     });
   },
   computed: {
-    selectedInputFormatLang() {
-      return (formats[this.$store.state.inputType] || {}).editorLang || 'text';
-    },
-    selectedOutputFormatLang() {
-      return (formats[this.$store.state.outputType] || {}).editorLang || 'text';
-    },
     inputEditorId() {
       return `ace-input-editor-${this.file.id}`;
     },
@@ -103,19 +108,21 @@ export default {
       }
       return `Internal Error: ${this.parseError.text}`;
     },
-    isDownloadAll() {
-      return this.$store.state.isDownloadAll;
-    },
-    isParsedAll() {
-      return this.$store.state.isParsedAll;
-    },
+    ...mapState([
+      'isDownloadAll',
+      'isParsedAll',
+    ]),
+    ...mapState({
+      selectedInputFormatLang: (state) => (formats[state.inputType] || {}).editorLang || 'text',
+      selectedOutputFormatLang: (state) => (formats[state.outputType] || {}).editorLang || 'text',
+    }),
   },
   watch: {
     parseError(error) {
       const editor = ace.edit(this.inputEditorId);
       const editorSession = editor.getSession();
       const fileElement = this.getFileInfoEle();
-
+      const hasErrorClass = fileElement.hasClass('file-info-error');
       editorSession.clearAnnotations();
       if (error && error.location) {
         fileElement.toggleClass('file-info-error');
@@ -126,7 +133,7 @@ export default {
           text: error.text,
           type: error.type,
         }]);
-      } else if (error || fileElement.hasClass('file-info-error')) {
+      } else if ((error && !hasErrorClass) || hasErrorClass) {
         fileElement.toggleClass('file-info-error');
       }
     },
@@ -222,14 +229,20 @@ export default {
       });
       return filename;
     },
-    downloadOutputFile() {
+    createDownloadLink(content, fileName) {
       const element = document.createElement('a');
-      $(element).attr('href', `data:text/plain;charset=utf-8,${encodeURIComponent(this.output)}`);
-      $(element).attr('download', this.getOutputFileName());
+      $(element).attr('href', `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`);
+      $(element).attr('download', fileName);
       $(element).css('display', 'none');
       $(document.body).append(element);
       element.click();
       $(element).remove();
+    },
+    downloadOutputFile() {
+      this.createDownloadLink(this.output, this.getOutputFileName());
+    },
+    downloadInputFile() {
+      this.createDownloadLink(this.content, this.file.name);
     },
   },
 
