@@ -40,7 +40,7 @@ export default {
         this.isEmptyOutput = false;
       }
       if (this.isEmptyOutput || this.isEmptyInput) return;
-      this.$store.commit('setParseAll');
+      if (this.$store.state.files.length > 0) this.$store.commit('setParseAll');
     },
     downloadAll() {
       this.$store.commit('setDownloadAll');

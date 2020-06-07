@@ -21,18 +21,20 @@ export default { // eslint-disable-line
     uploadFile: '.sql',
   },
   dbml: {
-    name: 'DSL',
+    name: 'DBML',
     editorLang: 'dbml',
+    value: 'dbml',
   },
   json: {
     name: 'JSON',
     editorLang: 'json',
-  },
-  schemarb: {
-    value: 'schemarb',
-    name: 'schema.rb',
-    editorLang: 'ruby',
-    fileExtension: 'rb',
-    uploadFile: 'schema.rb',
+    value: 'json',
   },
 };
+/* schemarb: {
+  value: 'schemarb',
+  name: 'schema.rb',
+  editorLang: 'ruby',
+  fileExtension: 'rb',
+  uploadFile: 'schema.rb',
+}, */

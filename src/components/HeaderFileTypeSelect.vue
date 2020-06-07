@@ -1,14 +1,11 @@
 <template>
-    <select v-model="type" @change="setType">
-        <option value='' disabled>{{placeholder}}</option>
-        <option value="json">JSON</option>
-        <option value="mssql">MSSQL</option>
-        <option value="dbml">DBML</option>
-        <option value="mysql">MySQL</option>
-        <option value="postgres">Postgresql</option>
-    </select>
+    <BaseTypeSelect v-model="type" @input="setType">
+      {{placeholder}}
+    </BaseTypeSelect>
 </template>
 <script>
+import BaseTypeSelect from './BaseFileTypeSelect.vue';
+
 export default {
   name: 'HeaderFileTypeSelect',
   data() {
@@ -35,6 +32,9 @@ export default {
         this.$store.commit('setOutputType', this.type);
       }
     },
+  },
+  components: {
+    BaseTypeSelect,
   },
 };
 </script>

@@ -1,16 +1,27 @@
 <template>
   <div>
     <header class="flex justify-between">
-      <div class="self-end">
-        <HeaderButton icon="download" @click.native="downloadInputFile">
-          Input
-        </HeaderButton>
+      <div class="menu self-end">
+        <div>
+          <HeaderButton icon="download" @click.native="downloadInputFile">
+            Input
+          </HeaderButton>
+          <TypeSelect v-model="inputType">
+            Select input type
+          </TypeSelect>
+        </div>
       </div>
       <div class="text-center text-3xl">{{file.name}}</div>
-      <div class="self-end">
-        <HeaderButton icon="download" @click.native="downloadOutputFile">
-          Output
-        </HeaderButton>
+      <div class="menu self-end">
+        <div>
+          <TypeSelect v-model="outputType">
+            Select output type
+          </TypeSelect>
+
+          <HeaderButton icon="download" @click.native="downloadOutputFile">
+            Output
+          </HeaderButton>
+        </div>
       </div>
     </header>
     <div class="flex justify-between">
@@ -20,7 +31,7 @@
           v-model="content"
           @init="editorInit"
           @input="editorChange"
-          v-bind:lang="selectedInputFormatLang"
+          v-bind:lang="inputLang"
           v-bind:options="editorOptions"
           theme="holistics"
           ref="aceEditor"
@@ -31,17 +42,12 @@
         </div>
       </div>
       <div class="ace-editor-wrapper">
-          <AceEditor
-            :id="outputEditorId"
-            v-model="output"
-            @init="editorInit"
-            v-bind:lang="selectedOutputFormatLang"
-            v-bind:options="editorOptions"
-            theme="holistics"
-            ref="aceEditor"
-            class="editor"
-          />
-        </div>
+        <OutputView
+          :id="outputEditorId"
+          :lang="outputLang"
+          :output="output"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -54,14 +60,17 @@ import 'brace/mode/pgsql'; // language
 import 'brace/mode/mysql';
 import 'brace/mode/sqlserver';
 import 'brace/mode/json';
+import 'brace/mode/ruby';
 import 'brace/ext/language_tools';
 import 'brace/ext/searchbox';
 import './dbml_mode';
 import './holistics_theme';
 import { Parser, ModelExporter } from '@dbml/core';
 import { mapState } from 'vuex';
-import formats from './constants';
+import formats from '../../constants';
 import HeaderButton from '../HeaderButton.vue';
+import OutputView from './OutputView.vue';
+import TypeSelect from '../BaseFileTypeSelect.vue';
 
 let scrollIntoView;
 export default {
@@ -69,6 +78,8 @@ export default {
   components: {
     AceEditor,
     HeaderButton,
+    OutputView,
+    TypeSelect,
   },
   props: {
     file: {
@@ -93,6 +104,8 @@ export default {
       content: this.file.content,
       output: '',
       parseError: '',
+      inputType: '',
+      outputType: '',
     });
   },
   computed: {
@@ -108,16 +121,34 @@ export default {
       }
       return `Internal Error: ${this.parseError.text}`;
     },
+    inputLang() {
+      return (formats[this.inputType] || {}).editorLang || 'text';
+    },
+    outputLang() {
+      return (formats[this.outputType] || {}).editorLang || 'text';
+    },
     ...mapState([
       'isDownloadAll',
       'isParsedAll',
     ]),
     ...mapState({
-      selectedInputFormatLang: (state) => (formats[state.inputType] || {}).editorLang || 'text',
-      selectedOutputFormatLang: (state) => (formats[state.outputType] || {}).editorLang || 'text',
+      gInputType: 'inputType',
+      gOutputType: 'outputType',
     }),
   },
   watch: {
+    gInputType(storeVal) {
+      this.inputType = storeVal;
+    },
+    gOutputType(storeVal) {
+      this.outputType = storeVal;
+    },
+    inputType() {
+      this.parseDirectly(this.content);
+    },
+    outputType() {
+      this.parseDirectly(this.content);
+    },
     parseError(error) {
       const editor = ace.edit(this.inputEditorId);
       const editorSession = editor.getSession();
@@ -164,7 +195,6 @@ export default {
     }
   },
   mounted() {
-    ace.edit(this.outputEditorId).setReadOnly(true);
     const currentEl = this.$el;
     scrollIntoView = () => {
       currentEl.scrollIntoView();
@@ -193,8 +223,8 @@ export default {
       editorSession.clearAnnotations();
       if (content && content.length > 0) {
         try {
-          const database = Parser.parse(this.content, this.$store.state.inputType);
-          this.output = ModelExporter.export(database, this.$store.state.outputType, false);
+          const database = Parser.parse(this.content, this.inputType);
+          this.output = ModelExporter.export(database, this.outputType, false);
           this.parseError = null;
         } catch (err) {
           this.output = '';
@@ -221,7 +251,7 @@ export default {
       parts.forEach((part, index) => {
         let addedPart = `${part}.`;
         if (index === parts.length - 1) {
-          addedPart = this.$store.state.outputType;
+          addedPart = formats[this.outputType].fileExtension;
         } else if (addedPart === 'in.') {
           addedPart = 'out.';
         }
@@ -256,7 +286,7 @@ export default {
     width: 50%;
   }
   .error-container {
-    height: 2rem;
+    height: 4rem;
     width: 100%;
     color: white;
     background-color: #e74c3c;
@@ -268,5 +298,8 @@ export default {
     margin-top: 1px;
     overflow-y: scroll;
     box-sizing: border-box;
+  }
+  .menu > div{
+    display: flex;
   }
 </style>
