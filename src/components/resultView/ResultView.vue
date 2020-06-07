@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="text-center text-5xl">{{file.name}}</div>
+    <div>
+      <div class="text-center text-5xl">{{file.name}}</div>
+      <button @click="sendDownloadFile">Download Output</button>
+    </div>
     <div class="flex justify-between">
       <div class="ace-editor-wrapper">
         <AceEditor
@@ -98,7 +101,6 @@ export default {
       if (this.parseError.location) {
         return `${this.parseError.row + 1}:${this.parseError.column} ${this.parseError.text}`;
       }
-      console.error(this.parseError);
       return `Internal Error: ${this.parseError.text}`;
     },
   },
@@ -151,7 +153,7 @@ export default {
     fileElement.on('click', scrollIntoView);
   },
   beforeDestroy() {
-    this.getFileInfoEle().removeEventListener('click', scrollIntoView);
+    this.getFileInfoEle().off('click', scrollIntoView);
   },
   methods: {
     getFileInfoEle() {
@@ -160,7 +162,6 @@ export default {
     editorInit() {
       console.log('enabled!');
     },
-    // eslint-disable-next-line no-unused-vars
     editorChange(content) {
       this.parse(content);
     },
@@ -182,6 +183,7 @@ export default {
             type: 'error',
             ...err,
           };
+          if (!err.location) console.error(err);
           return null;
         }
       }
@@ -191,7 +193,32 @@ export default {
     parse: debounce(function parse(content) {
       return this.parseDirectly(content);
     }, 300),
+    getOutputFileName() {
+      let filename = '';
+      const parts = this.file.name.split('.');
+      parts.forEach((part, index) => {
+        let addedPart = `${part}.`;
+        if (index === parts.length - 1) {
+          addedPart = this.$store.state.outputType;
+        } else if (addedPart === 'in.') {
+          addedPart = 'out.';
+        }
+        filename += addedPart;
+      });
+      console.log(filename);
+      return filename;
+    },
+    sendDownloadFile() {
+      const element = document.createElement('a');
+      $(element).attr('href', `data:text/plain;charset=utf-8,${encodeURIComponent(this.output)}`);
+      $(element).attr('download', this.getOutputFileName());
+      $(element).css('display', 'none');
+      $(document.body).append(element);
+      element.click();
+      $(element).remove();
+    },
   },
+
 };
 
 

@@ -43,7 +43,7 @@ export default {
 }
 
 .file-info-hover:hover {
-  @apply underline text-blue-400;
+  @apply underline text-blue-400 cursor-pointer;
 }
 
 .file-info-error {
