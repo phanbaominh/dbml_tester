@@ -33,10 +33,3 @@ export default { // eslint-disable-line
     fileExtension: 'json',
   },
 };
-/* schemarb: {
-  value: 'schemarb',
-  name: 'schema.rb',
-  editorLang: 'ruby',
-  fileExtension: 'rb',
-  uploadFile: 'schema.rb',
-}, */

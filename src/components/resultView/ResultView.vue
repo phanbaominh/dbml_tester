@@ -10,13 +10,15 @@
             <HeaderButton icon="download" @click="downloadInputFile">
               Input
             </HeaderButton>
-            <TypeSelect v-model="inputType">
+            <TypeSelect v-model="inputType" :formats="formats">
               Select input type
             </TypeSelect>
           </div>
         </div>
       </div>
-      <div class="text-center text-3xl">{{file.name}}</div>
+      <div class="text-center text-3xl" :class="{'file-info-error': parseError}">
+        {{file.name}}
+      </div>
       <div class="menu">
         <ShowHide
           class="self-end mb-2"
@@ -78,13 +80,23 @@ import './dbml_mode';
 import './holistics_theme';
 import { Parser, ModelExporter } from '@dbml/core';
 import { mapState } from 'vuex';
-import formats from '../../constants';
+import commonFormats from '../../constants';
 import HeaderButton from '../HeaderButton.vue';
 import OutputView from './OutputView.vue';
 import TypeSelect from '../BaseFileTypeSelect.vue';
 import ShowHide from '../BaseShowHide.vue';
 
 let scrollIntoView;
+const formats = {
+  ...commonFormats,
+  schemarb: {
+    value: 'schemarb',
+    name: 'schema.rb',
+    editorLang: 'ruby',
+    fileExtension: 'rb',
+    uploadFile: 'schema.rb',
+  },
+};
 export default {
   name: 'ResultView',
   components: {
@@ -121,6 +133,7 @@ export default {
       parseError: '',
       inputType: '',
       outputType: '',
+      formats,
     });
   },
   computed: {
@@ -137,10 +150,10 @@ export default {
       return `Internal Error: ${this.parseError.text}`;
     },
     inputLang() {
-      return (formats[this.inputType] || {}).editorLang || 'text';
+      return (this.formats[this.inputType] || {}).editorLang || 'text';
     },
     outputLang() {
-      return (formats[this.outputType] || {}).editorLang || 'text';
+      return (this.formats[this.outputType] || {}).editorLang || 'text';
     },
     ...mapState([
       'downloadAllType',

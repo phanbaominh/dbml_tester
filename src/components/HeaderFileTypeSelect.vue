@@ -1,27 +1,34 @@
 <template>
-    <BaseTypeSelect v-model="type" @input="setType">
-      {{placeholder}}
+    <BaseTypeSelect v-model="type" @input="setType" :formats="isInput ? formats : null">
+      <slot></slot>
     </BaseTypeSelect>
 </template>
 <script>
 import BaseTypeSelect from './BaseFileTypeSelect.vue';
+import commonFormats from '../constants';
 
+const formats = {
+  ...commonFormats,
+  schemarb: {
+    value: 'schemarb',
+    name: 'schema.rb',
+    editorLang: 'ruby',
+    fileExtension: 'rb',
+    uploadFile: 'schema.rb',
+  },
+};
 export default {
   name: 'HeaderFileTypeSelect',
   data() {
     return {
       type: '',
+      formats,
     };
   },
   props: {
     isInput: {
       type: Boolean,
       default: true,
-    },
-  },
-  computed: {
-    placeholder() {
-      return this.isInput ? 'Select input type' : 'Select output type';
     },
   },
   methods: {

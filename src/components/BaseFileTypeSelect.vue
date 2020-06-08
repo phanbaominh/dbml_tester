@@ -9,13 +9,17 @@
     </select>
 </template>
 <script>
-import formats from '../constants';
+import commonFormats from '../constants';
 
 export default {
   props: {
     value: {
       type: String,
       default: '',
+    },
+    formats: {
+      type: Object,
+      default: null,
     },
   },
   data() {
@@ -24,10 +28,11 @@ export default {
     };
   },
   mounted() {
-    Object.keys(formats).forEach((type) => {
+    const allFormats = this.formats || commonFormats;
+    Object.keys(allFormats).forEach((type) => {
       this.options.push({
-        name: formats[type].name,
-        value: formats[type].value,
+        name: allFormats[type].name,
+        value: allFormats[type].value,
       });
     });
     this.$el.value = '';

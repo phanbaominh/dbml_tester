@@ -3,14 +3,18 @@
       <FileUploader/>
       <header>
         <div id="header-buttons-container" class="flex items-center">
-            <TypeSelect
-            :isInput="true"
-            @change.native="parseAll(true)"
-            />
-            <TypeSelect
-            :isInput="false"
-            @change.native="parseAll(false)"
-            />
+            <HeaderTypeSelect
+              @change.native="parseAll(true)"
+              :isInput="true"
+            >
+              Select input type
+            </HeaderTypeSelect>
+            <HeaderTypeSelect
+              :isInput="false"
+              @change.native="parseAll(false)"
+            >
+              Select output type
+            </HeaderTypeSelect>
             <HeaderButton icon="download" @click="downloadAll('input')">
               All Input
             </HeaderButton>
@@ -23,7 +27,7 @@
 </template>
 <script>
 
-import TypeSelect from './HeaderFileTypeSelect.vue';
+import HeaderTypeSelect from './HeaderFileTypeSelect.vue';
 import FileUploader from './HeaderFileUploader.vue';
 import HeaderButton from './HeaderButton.vue';
 
@@ -50,7 +54,7 @@ export default {
     },
   },
   components: {
-    TypeSelect,
+    HeaderTypeSelect,
     FileUploader,
     HeaderButton,
   },
