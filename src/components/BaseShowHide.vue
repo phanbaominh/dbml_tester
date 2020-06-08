@@ -1,15 +1,15 @@
 <template>
 <div>
-    <HeaderButton v-if="isShown" icon="caret-up" @click="hide">
+    <BaseButton v-if="isShown" icon="caret-up" @click="hide">
         Hide
-    </HeaderButton>
-    <HeaderButton v-else icon="caret-down" @click="show">
+    </BaseButton>
+    <BaseButton v-else icon="caret-down" @click="show">
         Show
-    </HeaderButton>
+    </BaseButton>
 </div>
 </template>
 <script>
-import HeaderButton from './HeaderButton.vue';
+import BaseButton from './BaseButton.vue';
 
 export default {
   data() {
@@ -18,7 +18,7 @@ export default {
     };
   },
   components: {
-    HeaderButton,
+    BaseButton,
   },
   methods: {
     hide() {

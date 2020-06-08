@@ -2,14 +2,14 @@
   <div class="mb-2">
     <header class="flex justify-between">
       <div class="menu">
-        <HeaderButton class ="mb-2 self-start" icon="arrow-up" @click="backToTop">
+        <BaseButton class ="mb-2 self-start" icon="arrow-up" @click="backToTop">
           Back to top
-        </HeaderButton>
+        </BaseButton>
         <div>
           <div class="flex">
-            <HeaderButton icon="download" @click="downloadInputFile">
+            <DownloadButton @click="downloadInputFile">
               Input
-            </HeaderButton>
+            </DownloadButton>
             <TypeSelect v-model="inputType" :formats="formats">
               Select input type
             </TypeSelect>
@@ -30,9 +30,9 @@
             <TypeSelect v-model="outputType">
               Select output type
             </TypeSelect>
-            <HeaderButton icon="download" @click="downloadOutputFile">
+            <DownloadButton @click="downloadOutputFile">
               Output
-            </HeaderButton>
+            </DownloadButton>
           </div>
       </div>
       </div>
@@ -81,7 +81,8 @@ import './holistics_theme';
 import { Parser, ModelExporter } from '@dbml/core';
 import { mapState } from 'vuex';
 import commonFormats from '../../constants';
-import HeaderButton from '../HeaderButton.vue';
+import BaseButton from '../BaseButton.vue';
+import DownloadButton from '../BaseButtonDownload.vue';
 import OutputView from './OutputView.vue';
 import TypeSelect from '../BaseFileTypeSelect.vue';
 import ShowHide from '../BaseShowHide.vue';
@@ -101,10 +102,11 @@ export default {
   name: 'ResultView',
   components: {
     AceEditor,
-    HeaderButton,
+    BaseButton,
     OutputView,
     TypeSelect,
     ShowHide,
+    DownloadButton,
   },
   props: {
     file: {

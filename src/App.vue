@@ -59,20 +59,6 @@ header select {
   background-color: #373c44;
 }
 
-
-.file-info-hover:hover {
-  cursor: pointer;
-  text-decoration: underline;
-  --text-opacity: 1;
-  color: rgba(99, 179, 237, var(--text-opacity));
-}
-
-.file-info-error {
- --text-opacity: 1;
- color: rgba(245, 101, 101, var(--text-opacity));
- font-weight: bold;
-}
-
 /* ScrollBar */
 ::-webkit-scrollbar {
   width: 6px;

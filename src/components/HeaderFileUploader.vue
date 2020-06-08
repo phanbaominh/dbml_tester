@@ -3,21 +3,43 @@
     name="test"
     ref="pond"
     class="filepond"
-    label-idle="Drop files here..."
+    :label-idle="label"
     v-bind:allow-multiple="true"
     v-on:addfile="onAddFile"
     v-on:removefile="onRemoveFile"
+    v-on:initfile="onInitFile"
     />
 </template>
 <script>
 import vueFilePond from 'vue-filepond';
 import 'filepond/dist/filepond.min.css';
+import debounce from 'lodash/debounce';
 
 const FilePond = vueFilePond();
 export default {
+  data() {
+    return {
+      isLoadingFile: false,
+    };
+  },
+  computed: {
+    label() {
+      return !this.isLoadingFile ? 'Drop files here...' : 'Loading files...';
+    },
+  },
   methods: {
+    finishLoad() {
+      this.isLoadingFile = false;
+    },
+    dbFinishLoad: debounce(function () {
+      this.finishLoad();
+    }, 500),
+    onInitFile() {
+      this.isLoadingFile = true;
+    },
     onAddFile(error, file) {
       this.$store.dispatch('setFile', file);
+      this.dbFinishLoad();
     },
 
     onRemoveFile(error, file) {

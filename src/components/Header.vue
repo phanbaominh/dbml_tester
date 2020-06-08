@@ -15,12 +15,21 @@
             >
               Select output type
             </HeaderTypeSelect>
-            <HeaderButton icon="download" @click="downloadAll('input')">
+            <DownloadButton
+              @click="downloadAll('input')"
+              :isDownloading="isDownloadingInput"
+            >
               All Input
-            </HeaderButton>
-            <HeaderButton icon="download" @click="downloadAll('output')">
+            </DownloadButton>
+            <DownloadButton
+              @click="downloadAll('output')"
+              :isDownloading="isDownloadingOutput"
+            >
               All Output
-            </HeaderButton>
+            </DownloadButton>
+            <DownloadButton>
+              Test
+            </DownloadButton>
         </div>
       </header>
     </div>
@@ -29,7 +38,7 @@
 
 import HeaderTypeSelect from './HeaderFileTypeSelect.vue';
 import FileUploader from './HeaderFileUploader.vue';
-import HeaderButton from './HeaderButton.vue';
+import DownloadButton from './BaseButtonDownload.vue';
 
 export default {
   name: 'Header',
@@ -38,6 +47,16 @@ export default {
       isEmptyInput: true,
       isEmptyOutput: true,
     };
+  },
+  computed: {
+    isDownloadingInput() {
+      const { state } = this.$store;
+      return state.downloadAllType === 'input' && Boolean(state.downloadAllType);
+    },
+    isDownloadingOutput() {
+      const { state } = this.$store;
+      return state.downloadAllType === 'output' && Boolean(state.downloadAllType);
+    },
   },
   methods: {
     parseAll(isInputType) {
@@ -56,7 +75,7 @@ export default {
   components: {
     HeaderTypeSelect,
     FileUploader,
-    HeaderButton,
+    DownloadButton,
   },
 };
 </script>
@@ -68,7 +87,6 @@ export default {
 
 #header-buttons-container > *{
   margin-left: 1rem;
-  display: inline-block;
 }
 
 </style>
