@@ -24,11 +24,13 @@ export default { // eslint-disable-line
     name: 'DBML',
     editorLang: 'dbml',
     value: 'dbml',
+    fileExtension: 'dbml',
   },
   json: {
     name: 'JSON',
     editorLang: 'json',
     value: 'json',
+    fileExtension: 'json',
   },
 };
 /* schemarb: {

@@ -1,5 +1,5 @@
 <template>
-    <button class="base-menu-btn has-background">
+    <button class="base-menu-btn has-background" @click="$emit('click')">
         <font-awesome-icon :icon="icon" />
         <span class="title"><slot></slot></span>
     </button>

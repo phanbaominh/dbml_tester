@@ -29,5 +29,16 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style>
+.filepond--panel-root {
+  background-color: #1c2128;
+  border-radius: 0;
+}
+
+.filepond--drop-label {
+  color: #eee;
+}
+.filepond--item-panel {
+    background-color: #373c44;
+}
 </style>

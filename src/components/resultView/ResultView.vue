@@ -1,30 +1,41 @@
 <template>
-  <div>
+  <div class="mb-2">
     <header class="flex justify-between">
-      <div class="menu self-end">
+      <div class="menu">
+        <HeaderButton class ="mb-2 self-start" icon="arrow-up" @click="backToTop">
+          Back to top
+        </HeaderButton>
         <div>
-          <HeaderButton icon="download" @click.native="downloadInputFile">
-            Input
-          </HeaderButton>
-          <TypeSelect v-model="inputType">
-            Select input type
-          </TypeSelect>
+          <div class="flex">
+            <HeaderButton icon="download" @click="downloadInputFile">
+              Input
+            </HeaderButton>
+            <TypeSelect v-model="inputType">
+              Select input type
+            </TypeSelect>
+          </div>
         </div>
       </div>
       <div class="text-center text-3xl">{{file.name}}</div>
-      <div class="menu self-end">
+      <div class="menu">
+        <ShowHide
+          class="self-end mb-2"
+          @show="isHidden = false"
+          @hide="isHidden = true"
+        />
         <div>
-          <TypeSelect v-model="outputType">
-            Select output type
-          </TypeSelect>
-
-          <HeaderButton icon="download" @click.native="downloadOutputFile">
-            Output
-          </HeaderButton>
-        </div>
+          <div class="flex">
+            <TypeSelect v-model="outputType">
+              Select output type
+            </TypeSelect>
+            <HeaderButton icon="download" @click="downloadOutputFile">
+              Output
+            </HeaderButton>
+          </div>
+      </div>
       </div>
     </header>
-    <div class="flex justify-between">
+    <div class="flex justify-between" :class="{hidden: isHidden}">
       <div class="ace-editor-wrapper">
         <AceEditor
           :id="inputEditorId"
@@ -71,6 +82,7 @@ import formats from '../../constants';
 import HeaderButton from '../HeaderButton.vue';
 import OutputView from './OutputView.vue';
 import TypeSelect from '../BaseFileTypeSelect.vue';
+import ShowHide from '../BaseShowHide.vue';
 
 let scrollIntoView;
 export default {
@@ -80,6 +92,7 @@ export default {
     HeaderButton,
     OutputView,
     TypeSelect,
+    ShowHide,
   },
   props: {
     file: {
@@ -89,7 +102,7 @@ export default {
   },
   data() {
     return ({
-      isEditorOpen: true,
+      isHidden: false,
       editorOptions: {
         tabSize: 2,
         enableBasicAutocompletion: true,
@@ -97,9 +110,11 @@ export default {
         hScrollBarAlwaysVisible: false,
         vScrollBarAlwaysVisible: false,
         fontSize: 14,
+        minLines: 40,
         maxLines: 40,
         showPrintMargin: false,
         fontFamily: 'monospace',
+        autoScrollEditorIntoView: true,
       },
       content: this.file.content,
       output: '',
@@ -128,7 +143,7 @@ export default {
       return (formats[this.outputType] || {}).editorLang || 'text';
     },
     ...mapState([
-      'isDownloadAll',
+      'downloadAllType',
       'isParsedAll',
     ]),
     ...mapState({
@@ -154,9 +169,11 @@ export default {
       const editorSession = editor.getSession();
       const fileElement = this.getFileInfoEle();
       const hasErrorClass = fileElement.hasClass('file-info-error');
+      if ((error && !hasErrorClass) || (!error && hasErrorClass)) {
+        fileElement.toggleClass('file-info-error');
+      }
       editorSession.clearAnnotations();
       if (error && error.location) {
-        fileElement.toggleClass('file-info-error');
         editorSession.clearAnnotations();
         editorSession.setAnnotations([{
           row: error.row,
@@ -164,8 +181,6 @@ export default {
           text: error.text,
           type: error.type,
         }]);
-      } else if ((error && !hasErrorClass) || hasErrorClass) {
-        fileElement.toggleClass('file-info-error');
       }
     },
     'file.content': function (content) {
@@ -177,13 +192,14 @@ export default {
         this.parseDirectly(this.content);
       }
     },
-    isDownloadAll(isDownloadAll) {
-      if (isDownloadAll) {
-        const output = {
-          name: this.getOutputFileName(),
-          content: this.output,
+    downloadAllType(type) {
+      if (type) {
+        const isInput = type === 'input';
+        const file = {
+          name: isInput ? this.file.name : this.getOutputFileName(),
+          content: isInput ? this.content : this.output,
         };
-        this.$store.dispatch('setOutputFile', output);
+        this.$store.dispatch('setOutputFile', file);
       }
     },
   },
@@ -274,6 +290,9 @@ export default {
     downloadInputFile() {
       this.createDownloadLink(this.content, this.file.name);
     },
+    backToTop() {
+      $('.filepond')[0].scrollIntoView();
+    },
   },
 
 };
@@ -282,7 +301,6 @@ export default {
 </script>
 <style scoped>
   .ace-editor-wrapper {
-    margin-bottom: 5rem;
     width: 50%;
   }
   .error-container {
@@ -299,7 +317,9 @@ export default {
     overflow-y: scroll;
     box-sizing: border-box;
   }
-  .menu > div{
+  .menu {
     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 </style>

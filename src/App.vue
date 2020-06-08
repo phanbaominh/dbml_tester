@@ -36,10 +36,14 @@ export default {
 </script>
 
 <style>
+body {
+  background-color: #373C44;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #373C44;
 }
 header {
   background-color: #1c2128;;
@@ -55,20 +59,24 @@ header select {
   background-color: #373c44;
 }
 
+
 .file-info-hover:hover {
-  @apply underline text-blue-400 cursor-pointer;
+  cursor: pointer;
+  text-decoration: underline;
+  --text-opacity: 1;
+  color: rgba(99, 179, 237, var(--text-opacity));
 }
 
 .file-info-error {
-  color: red;
+ --text-opacity: 1;
+ color: rgba(245, 101, 101, var(--text-opacity));
+ font-weight: bold;
 }
 
+/* ScrollBar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-}
-::-webkit-scrollbar:hover {
-
 }
 /* Track */
 ::-webkit-scrollbar-track {

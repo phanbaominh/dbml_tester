@@ -46,6 +46,7 @@ export default {
         hScrollBarAlwaysVisible: false,
         vScrollBarAlwaysVisible: false,
         fontSize: 14,
+        minLines: 40,
         maxLines: 40,
         showPrintMargin: false,
         fontFamily: 'monospace',

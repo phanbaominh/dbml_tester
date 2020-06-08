@@ -11,8 +11,11 @@
             :isInput="false"
             @change.native="parseAll(false)"
             />
-            <HeaderButton icon="download" @click.native="downloadAll">
-              Download All Output
+            <HeaderButton icon="download" @click="downloadAll('input')">
+              All Input
+            </HeaderButton>
+            <HeaderButton icon="download" @click="downloadAll('output')">
+              All Output
             </HeaderButton>
         </div>
       </header>
@@ -42,8 +45,8 @@ export default {
       if (this.isEmptyOutput || this.isEmptyInput) return;
       if (this.$store.state.files.length > 0) this.$store.commit('setParseAll');
     },
-    downloadAll() {
-      this.$store.commit('setDownloadAll');
+    downloadAll(type) {
+      this.$store.commit('setDownloadAll', type);
     },
   },
   components: {

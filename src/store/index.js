@@ -10,9 +10,9 @@ export default new Vuex.Store({
     inputType: '',
     outputType: '',
     files: [],
-    outputCount: 0,
+    fileCount: 0,
     zip: new JSZip(),
-    isDownloadAll: false,
+    downloadAllType: null,
     parseCount: 0,
     isParsedAll: false,
   },
@@ -31,9 +31,9 @@ export default new Vuex.Store({
       Vue.set(state.files, payload.index, payload.value);
     },
 
-    addFileToFolder(state, output) {
-      state.zip.folder('output').file(output.name, output.content);
-      state.outputCount += 1;
+    addFileToFolder(state, file) {
+      state.zip.folder(state.downloadAllType).file(file.name, file.content);
+      state.fileCount += 1;
     },
     removeFile(state, id) {
       const index = state.files.findIndex((file) => file.id === id);
@@ -49,12 +49,12 @@ export default new Vuex.Store({
         state.isParsedAll = false;
       }
     },
-    setDownloadAll(state) {
-      state.isDownloadAll = !state.isDownloadAll;
+    setDownloadAll(state, type) {
+      state.downloadAllType = type;
     },
     resetDownloadStatus(state) {
-      state.isDownloadAll = false;
-      state.outputCount = 0;
+      state.downloadAllType = null;
+      state.fileCount = 0;
       state.zip = new JSZip();
     },
   },
@@ -69,13 +69,13 @@ export default new Vuex.Store({
       });
     },
 
-    async setOutputFile({ state, commit }, output) {
-      commit('addFileToFolder', output);
-      if (state.outputCount === state.files.length) {
+    async setOutputFile({ state, commit }, file) {
+      commit('addFileToFolder', file);
+      if (state.fileCount === state.files.length) {
         const base64zip = await state.zip.generateAsync({ type: 'base64' });
         const element = document.createElement('a');
         $(element).attr('href', `data:application/zip;base64,${base64zip}`);
-        $(element).attr('download', 'output.zip');
+        $(element).attr('download', `${state.downloadAllType}.zip`);
         $(element).css('display', 'none');
         $(document.body).append(element);
         element.click();
